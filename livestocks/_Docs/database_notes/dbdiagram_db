@@ -1,0 +1,59 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table animal_specifics {
+    id integer [primary key]
+    gender  varchar
+    animal_id varchar
+    birth_date  varchar
+    number_siblings integer [note: 'single, twin, triplets']
+    created_at timestamp 
+
+}
+
+Table animal_species {
+  id integer [primary key]
+  breed varchar
+  species varchar
+  created_at timestamp
+}
+
+Table animal_family {
+  id integer [primary key]
+  relation varchar
+  relation_id int [ref: > animal_specifics.animal_id] 
+}
+
+// 
+Table animal_history {
+  id integer [primary key]
+  id_animal integer [ref: > animal_specifics.animal_id]
+  notes varchar
+  status varchar
+  created_at timestamp
+}
+Table feed_rations {
+    id integer [primary key]
+  notes varchar
+  date_start integer
+  brand_name varchar
+  ingredients_id  integer
+  created_at timestamp
+}
+
+Table bookie_records {
+  // needs work just want to lock the idea down
+    id integer [primary key]
+    for_sale varchar
+    for_bought varchar
+    for_date_sold varchar
+    for_date_bought varchar
+}
+
+
+Ref: animal_specifics.id > animal_species.id // many-to-one
+
+Ref: animal_specifics.id - animal_family.id 
+
+
+Ref: animal_specifics.id <> feed_rations.id
