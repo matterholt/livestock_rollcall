@@ -11,24 +11,34 @@ from django.urls import reverse  # Used to generate URLs by reversing the URL pa
 
 # Create your models here.
 class Specific(models.Model):
-    gender = models.CharField(max_length=200)
     animal_id = models.CharField(
         max_length=200,
         unique=True,
         help_text="any way to ID the lamb visually name or number",
     )
-    birth_date = models.CharField(max_length=200)
-    sibling_set = models.CharField(
-        max_length=200, unique=True, help_text="born as single (1), twin(2), triplet(3)"
+    GENDER_OPTIONS = (
+        ("fx", "fixed"),
+        ("f", "female"),
+        ("m", "male"),
+        ("s", "stud"),
     )
-    relations = models.ForeignKey("Genealogy", on_delete=models.RESTRICT, null=True)
+    gender = models.CharField(
+        max_length=3,
+        choices=GENDER_OPTIONS,
+        blank=True,
+    )
+
+    birth_date = models.DateField()
+    sibling_set = models.PositiveSmallIntegerField(
+        null=True, default=1, help_text="born as single (1), twin(2), triplet(3), etc"
+    )
     species_id = models.ForeignKey("Specie", on_delete=models.RESTRICT, null=True)
 
     def __str__(self):
-        return self.breed
+        return self.animal_id
 
     def get_absolute_url(self):
-        return reverse("breed-detail", args=[str(self.id)])
+        return reverse("animal-detail", args=[str(self.id)])
 
 
 class History(models.Model):
@@ -42,12 +52,12 @@ class History(models.Model):
     ANIMAL_STATUS = (
         ("s", "sold"),
         ("i", "ill"),
-        ("r", "roster"),
+        ("a", "active"),
         ("p", "purchased"),
         ("d", "delivered"),
     )
     status = models.CharField(
-        max_length=1, choices=ANIMAL_STATUS, blank=True, default="r"
+        max_length=1, choices=ANIMAL_STATUS, blank=True, default="a"
     )
     notes = models.CharField(max_length=500)
     animal_id = models.ForeignKey("Specific", on_delete=models.RESTRICT, null=True)
@@ -75,19 +85,39 @@ class Specie(models.Model):
 
 
 class Genealogy(models.Model):
-    relation = models.CharField(max_length=100)
-    relation_id = models.ForeignKey(Specific, on_delete=models.RESTRICT, null=True)
+    which_animal = models.ForeignKey("Specific", on_delete=models.RESTRICT, null=True)
+
+    family_tree = models.ForeignKey(
+        "Specific",
+        on_delete=models.RESTRICT,
+        null=True,
+        default=0,
+        related_name="same_blood",
+    )
+    RELATION_TYPE = (
+        ("m", "mother"),
+        ("f", "father"),
+        ("s", "sibling"),
+    )
+    relation = models.CharField(max_length=1, choices=RELATION_TYPE, blank=True)
 
     def __str__(self):
-        return self.relation
+        return self.which_animal
 
     def get_absolute_url(self):
         return reverse("relation-detail", args=[str(self.id)])
 
 
 class Record(models.Model):
-    action = models.CharField(max_length=500)
-    date_performed = models.CharField(max_length=500)
+    SELL_PURCHASE = (
+        ("s", "sold"),
+        ("p", "purchased"),
+        ("fs", "for sale"),
+        ("k", "keeper"),
+    )
+    action = models.CharField(
+        max_length=2, choices=SELL_PURCHASE, blank=True, default="k"
+    )
     value = models.IntegerField(default=0)
     animal_id = models.ForeignKey("Specific", on_delete=models.RESTRICT, null=True)
 
