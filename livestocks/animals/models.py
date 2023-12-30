@@ -1,6 +1,6 @@
 import uuid
 from django.db import models
-from django.urls import reverse # Used to generate URLs by reversing the URL patterns
+from django.urls import reverse  # Used to generate URLs by reversing the URL patterns
 
 # animal_species
 #   id integer [primary key]
@@ -8,47 +8,91 @@ from django.urls import reverse # Used to generate URLs by reversing the URL pat
 #   species varchar
 #   created_at timestamp
 
+
 # Create your models here.
 class Specific(models.Model):
     gender = models.CharField(max_length=200)
-    animal_id = models.CharField(max_length=200, unique=True, help_text = "any way to ID the lamb visually name or number")
+    animal_id = models.CharField(
+        max_length=200,
+        unique=True,
+        help_text="any way to ID the lamb visually name or number",
+    )
     birth_date = models.CharField(max_length=200)
-    sibling_set = models.CharField(max_length=200, unique=True, help_text = "born as single (1), twin(2), triplet(3)")
-
+    sibling_set = models.CharField(
+        max_length=200, unique=True, help_text="born as single (1), twin(2), triplet(3)"
+    )
+    relations = models.ForeignKey("Genealogy", on_delete=models.RESTRICT, null=True)
+    species_id = models.ForeignKey("Specie", on_delete=models.RESTRICT, null=True)
 
     def __str__(self):
         return self.breed
-    
-    def get_absolute_url (self):
-        return reverse('breed-detail', args=[str(self.id)])
-    
+
+    def get_absolute_url(self):
+        return reverse("breed-detail", args=[str(self.id)])
+
+
 class History(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4,
-                          help_text="Unique ID animal status update"),
-    ANIMAL_STATUS =(
-        ('s','sold'),
-        ('i','ill'),
-        ('r','roster'),
-        ('p','purchased'),
-        ('d','delivered'),
+    id = (
+        models.UUIDField(
+            primary_key=True,
+            default=uuid.uuid4,
+            help_text="Unique ID animal status update",
+        ),
     )
-    status = models.CharField(max_length=1, choices=ANIMAL_STATUS, blank=True, default='r')
+    ANIMAL_STATUS = (
+        ("s", "sold"),
+        ("i", "ill"),
+        ("r", "roster"),
+        ("p", "purchased"),
+        ("d", "delivered"),
+    )
+    status = models.CharField(
+        max_length=1, choices=ANIMAL_STATUS, blank=True, default="r"
+    )
     notes = models.CharField(max_length=500)
-    animal_id = models.ForeignKey(Specific, on_delete=models.RESTRICT, null= True)
+    animal_id = models.ForeignKey("Specific", on_delete=models.RESTRICT, null=True)
 
     def __str__(self):
         return self.status
+
     def get_absolute_url(self):
-        return reverse('history-detail',args=[str(self.id)])
+        return reverse("history-detail", args=[str(self.id)])
+
 
 class Specie(models.Model):
-    
-    specie = models.CharField(max_length=200, unique=True, help_text = "the type of livestock animal")
-    breed = models.CharField(max_length=200, unique=True, help_text = "from the specie what name of breed")
-    animal_id = models.ForeignKey(Specific, on_delete=models.RESTRICT, null= True)
+    specie = models.CharField(
+        max_length=200, unique=True, help_text="the type of livestock animal"
+    )
+    breed = models.CharField(
+        max_length=200, unique=True, help_text="from the specie what name of breed"
+    )
 
     def __str__(self):
         return self.breed
-    
-    def get_absolute_url (self):
-        return reverse('breed-detail', args=[str(self.id)])
+
+    def get_absolute_url(self):
+        return reverse("breed-detail", args=[str(self.id)])
+
+
+class Genealogy(models.Model):
+    relation = models.CharField(max_length=100)
+    relation_id = models.ForeignKey(Specific, on_delete=models.RESTRICT, null=True)
+
+    def __str__(self):
+        return self.relation
+
+    def get_absolute_url(self):
+        return reverse("relation-detail", args=[str(self.id)])
+
+
+class Record(models.Model):
+    action = models.CharField(max_length=500)
+    date_performed = models.CharField(max_length=500)
+    value = models.IntegerField(default=0)
+    animal_id = models.ForeignKey("Specific", on_delete=models.RESTRICT, null=True)
+
+    def __str__(self):
+        return self.action
+
+    def get_absolute_url(self):
+        return reverse("action-detail", args=[str(self.id)])
