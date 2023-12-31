@@ -2,12 +2,6 @@ import uuid
 from django.db import models
 from django.urls import reverse  # Used to generate URLs by reversing the URL patterns
 
-# animal_species
-#   id integer [primary key]
-#   breed varchar
-#   species varchar
-#   created_at timestamp
-
 
 # Create your models here.
 class Specific(models.Model):
@@ -49,21 +43,21 @@ class History(models.Model):
             help_text="Unique ID animal status update",
         ),
     )
-    ANIMAL_STATUS = (
-        ("s", "sold"),
-        ("i", "ill"),
-        ("a", "active"),
-        ("p", "purchased"),
-        ("d", "delivered"),
-    )
+    animal_id = models.ForeignKey("Specific", on_delete=models.RESTRICT, null=True)
+    ANIMAL_STATUS = {
+        "s": "sold",
+        "i": "ill",
+        "a": "active",
+        "p": "purchased",
+        "d": "delivered",
+    }
     status = models.CharField(
         max_length=1, choices=ANIMAL_STATUS, blank=True, default="a"
     )
-    notes = models.CharField(max_length=500)
-    animal_id = models.ForeignKey("Specific", on_delete=models.RESTRICT, null=True)
+    notes = models.TextField(verbose_name="Info pertaining to status")
 
     def __str__(self):
-        return self.status
+        return f"{self.ANIMAL_STATUS[self.status]} status to {self.animal_id} "
 
     def get_absolute_url(self):
         return reverse("history-detail", args=[str(self.id)])
@@ -85,14 +79,21 @@ class Specie(models.Model):
 
 
 class Genealogy(models.Model):
-    which_animal = models.ForeignKey("Specific", on_delete=models.RESTRICT, null=True)
+    which_animal = models.ForeignKey(
+        "Specific",
+        on_delete=models.RESTRICT,
+        null=True,
+        verbose_name="Animal id",
+        help_text="Animal define relation to",
+    )
 
     family_tree = models.ForeignKey(
         "Specific",
         on_delete=models.RESTRICT,
         null=True,
-        default=0,
         related_name="same_blood",
+        verbose_name="Animal that is related",
+        help_text="Select animal born of or born with",
     )
     RELATION_TYPE = (
         ("m", "mother"),
@@ -102,27 +103,28 @@ class Genealogy(models.Model):
     relation = models.CharField(max_length=1, choices=RELATION_TYPE, blank=True)
 
     def __str__(self):
-        return self.which_animal
+        return f"{self.which_animal} related to {self.family_tree}"
 
     def get_absolute_url(self):
         return reverse("relation-detail", args=[str(self.id)])
 
 
 class Record(models.Model):
-    SELL_PURCHASE = (
-        ("s", "sold"),
-        ("p", "purchased"),
-        ("fs", "for sale"),
-        ("k", "keeper"),
-    )
-    action = models.CharField(
-        max_length=2, choices=SELL_PURCHASE, blank=True, default="k"
-    )
-    value = models.IntegerField(default=0)
     animal_id = models.ForeignKey("Specific", on_delete=models.RESTRICT, null=True)
+    value = models.DecimalField(max_digits=6, decimal_places=2, help_text="currency")
+    SELL_PURCHASE = {
+        "s": "sold",
+        "p": "purchased",
+        "fs": "for sale",
+    }
+    action = models.CharField(
+        max_length=2,
+        choices=SELL_PURCHASE,
+        blank=True,
+    )
 
     def __str__(self):
-        return self.action
+        return f"{self.SELL_PURCHASE[self.action]} {self.animal_id} "
 
     def get_absolute_url(self):
         return reverse("action-detail", args=[str(self.id)])
