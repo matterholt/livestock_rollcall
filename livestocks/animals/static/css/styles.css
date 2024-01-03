@@ -1,0 +1,36 @@
+@layer layout {
+  .homepage_main_layout {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    grid-template-areas: "side content";
+  }
+
+  .sidebar_nav {
+    grid-area: side;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background-color: gray;
+
+    .main_navigation_site {
+      color: white;
+      height: 45px;
+      padding: 5px;
+      text-align: center;
+    }
+    .main_navigation_site:first-child {
+      margin-top: 50px;
+    }
+    .main_navigation_site:hover {
+      cursor: pointer;
+      text-decoration: underline;
+      font-weight: 900;
+      transition: all 0.3s ease 0s, left 0.3s ease 0s;
+    }
+  }
+
+  .main_app_content {
+    grid-area: content;
+    background-color: rgb(78, 75, 75);
+  }
+}

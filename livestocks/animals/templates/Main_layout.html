@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {% block title %}
+    <title>livestocks</title>
+    {% endblock %}
+    <!-- Add additional CSS in static file -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+  </head>
+  <body class="homepage_main_layout">
+    <div>
+      {% block nav %}
+      <nav class="sidebar_nav">
+        <a class="main_navigation_site" href="{% url 'index' %}">Home</a>
+        <a class="main_navigation_site href="{% url 'registered' %}">Registered Animals</a>
+        <a class="main_navigation_site href="{% url 'index' %}">Records</a>
+        <a class="main_navigation_site href="{% url 'index' %}">Species</a>
+      </nav>
+      {% endblock %}
+    </div>
+    <main class="main_app_content">{% block content %} {% endblock %}</main>
+  </body>
+</html>

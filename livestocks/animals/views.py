@@ -11,3 +11,8 @@ def index(request):
     context = {"num_animals": amount_animals, "num_history": amount_histories}
 
     return render(request, "index.html", context=context)
+
+
+def registered_animal(request):
+    context = {"greeting": "welcome registered animals"}
+    return render(request, "registered.html", context=context)
